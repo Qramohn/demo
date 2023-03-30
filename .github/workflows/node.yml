@@ -1,23 +1,26 @@
-name: "node"
-on:
-  pull_request_target:
-    types: [opened, synchronize]
-permissions:
-  pull-requests: write
-  contents: read
+name: Upload Node.js 10 and 12 tool cache
+on: push
 jobs:
-  scan-pull-request:
-    runs-on: ubuntu-latest
-    # A pull request needs to be approved, before Frogbot scans it. Any GitHub user who is associated with the
-    # "frogbot" GitHub environment can approve the pull request to be scanned.
-    environment: frogbot
+  upload_tool_cache:
+    runs-on: Windows
     steps:
-      - uses: actions/checkout@v2
-        with:
-          ref: ${{ github.event.pull_request.head.sha }}
-
-      # Install prerequisites
-      - name: Setup NodeJS
+      - name: Clear any existing tool cache
+        run: |
+          mv "${{ runner.tool_cache }}" "${{ runner.tool_cache }}.old"
+          mkdir -p "${{ runner.tool_cache }}"
+      - name: Setup Node 10
         uses: actions/setup-node@v3
         with:
-          node-version: "16.x"
+          node-version: 10.x
+      - name: Setup Node 12
+        uses: actions/setup-node@v3
+        with:
+          node-version: 16.x
+      - name: Archive tool cache
+        run: |
+          cd "${{ runner.tool_cache }}"
+          tar -czf tool_cache.tar.gz *
+      - name: Upload tool cache artifact
+        uses: actions/upload-artifact@v3
+        with:
+          path: ${{runner.tool_cache}}/tool_cache.tar.gz
