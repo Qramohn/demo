@@ -1,19 +1,23 @@
-name: node
-
+name: "node"
 on:
-  push:
-    branches: [ master ]
-  pull_request:
-    branches: [ master ]
-
+  pull_request_target:
+    types: [opened, synchronize]
+permissions:
+  pull-requests: write
+  contents: read
 jobs:
-  build:
-
-    runs-on: ubuntu-latest
+  scan-pull-request:
+    runs-on: self-hosted
+    # A pull request needs to be approved, before Frogbot scans it. Any GitHub user who is associated with the
+    # "frogbot" GitHub environment can approve the pull request to be scanned.
+    environment: frogbot
     steps:
-    - uses: actions/checkout@v3
-    - uses: actions/setup-node@v3
-      with:
-        node-version: 16
-    - run: npm ci
-    - run: npm test
+      - uses: actions/checkout@v2
+        with:
+          ref: ${{ github.event.pull_request.head.sha }}
+
+      # Install prerequisites
+      - name: Setup NodeJS
+        uses: actions/setup-node@v3
+        with:
+          node-version: "16.x"
