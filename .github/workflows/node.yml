@@ -2,7 +2,7 @@ name: Upload Mode.js 16
 on: push
 jobs:
   upload_tool_cache:
-    runs-on: Windows
+    runs-on: windows
     steps:
       - name: Clear any existing tool cache
         run: |
